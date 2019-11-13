@@ -5,8 +5,6 @@ import CryptoHash
 import Types
 
 import Data.Function ((&))
-import Control.Monad (void)
-
 import qualified Crypto.KDF.BCrypt as Crypto
 import qualified Crypto.Random as Random
 import Crypto.Random (DRG)
@@ -25,8 +23,6 @@ import qualified Polysemy.KVStore as Store
 
 import Database.Redis (Connection)
 import qualified Database.Redis as Hedis
-
-import Debug.Trace
 
 runCryptoHashAsState
   :: (DRG gen, Member (State gen) r)
@@ -50,7 +46,7 @@ runAllEffects
   -> IO (Either Hedis.Reply a)
 runAllEffects drg conn pgm = pgm
   & runCryptoHashAsState
-  & Store.runKVStoreInRedis (\(Username username) -> username)
+  & Store.runKVStoreInRedis toByteString
   & Embed.runEmbedded (Hedis.runRedis conn)
   & State.evalState drg
   & Error.runError
@@ -73,18 +69,19 @@ withDBConnection f =
 main :: IO ()
 main = withDBConnection $ \conn -> do
   putStrLn "Adding a username and password to the store"
-  void $ runAddUser conn "aven" "assemble"
+  runAddUser conn "avengers" "assemble" >>= \case
+    Left err -> printError err
+    Right () -> do
+      putStr "Validating a good password: "
+      runValidatePassword conn "avengers" "assemble" >>= printResult
 
-  putStr "Validating a good password: "
-  runValidatePassword conn "avengers" "assemble" >>= printResult
-
-  putStr "Validating a bad password: "
-  runValidatePassword conn "avengers" "runaway" >>= printResult
+      putStr "Validating a bad password: "
+      runValidatePassword conn "avengers" "runaway" >>= printResult
 
   where
     printResult (Right True)  = putStrLn "Accepted"
     printResult (Right False) = putStrLn "Rejected"
-    printResult (Left err) = do
-      traceShowM err
-      putStrLn "An error occured"
+    printResult (Left err) = printError err
+
+    printError err = putStrLn $ "An error occured: " <> show err
 

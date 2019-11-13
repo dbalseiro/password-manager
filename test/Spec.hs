@@ -30,7 +30,7 @@ hashit :: Password -> PasswordHash
 hashit = const "HASHED"
 
 reverseit :: Password -> PasswordHash
-reverseit (Password password) = PasswordHash $ BS.reverse password
+reverseit = PasswordHash . BS.reverse . toByteString
 
 runCryptoHash :: Bool -> Sem (CryptoHash : r) a -> Sem r a
 runCryptoHash constant =

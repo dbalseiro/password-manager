@@ -12,3 +12,16 @@ newtype Password = Password ByteString
 
 newtype PasswordHash = PasswordHash ByteString
   deriving (Eq, Show, IsString, Binary)
+
+class ToByteString a where
+  toByteString :: a -> ByteString
+
+instance ToByteString Username where
+  toByteString (Username bs) = bs
+
+instance ToByteString Password where
+  toByteString (Password bs) = bs
+
+instance ToByteString PasswordHash where
+  toByteString (PasswordHash bs) = bs
+
