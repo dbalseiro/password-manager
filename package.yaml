@@ -1,0 +1,91 @@
+name:                password-manager
+version:             0.1.0.0
+github:              "dbalseiro/password-manager"
+license:             BSD3
+author:              "Diego Balseiro"
+maintainer:          "dbalseiro@gmail.com"
+copyright:           "MIT"
+
+extra-source-files:
+- README.md
+- ChangeLog.md
+
+# Metadata used when publishing your package
+# synopsis:            Short description of your package
+# category:            Web
+
+# To avoid duplicated efforts in documentation and dealing with the
+# complications of embedding Haddock markup inside cabal files, it is
+# common to point users to the README.md file.
+description:         Please see the README on GitHub at <https://github.com/dbalseiro/password-manager#readme>
+
+dependencies:
+- base >= 4.7 && < 5
+# Polysemy
+- polysemy
+- polysemy-plugin
+- polysemy-zoo
+# Misc
+- bytestring
+
+ghc-options:
+- -threaded
+- -rtsopts
+- -with-rtsopts=-N
+
+# Recommended settings for polysemy
+- -O2
+- -flate-specialise
+- -fspecialise-aggressively
+- -fplugin=Polysemy.Plugin
+# Useful warnings
+- -Wall
+- -Wcompat
+- -Wredundant-constraints
+- -Wincomplete-record-updates
+- -Wincomplete-uni-patterns
+default-extensions:
+# Recommended extensions for polysemy
+- DataKinds
+- FlexibleContexts
+- GADTs
+- LambdaCase
+- PolyKinds
+- RankNTypes
+- ScopedTypeVariables
+- TypeApplications
+- TypeOperators
+- TypeFamilies
+- TemplateHaskell
+
+# Deriving extensions
+- GeneralizedNewtypeDeriving
+- DeriveGeneric
+
+# Misc extensions
+- OverloadedStrings
+
+
+library:
+  source-dirs: src
+  dependencies: binary
+
+executables:
+  password-manager-exe:
+    main:                Main.hs
+    source-dirs:         app
+    dependencies:
+    - password-manager
+    - hedis
+    - cryptonite
+
+tests:
+  password-manager-test:
+    main:                Spec.hs
+    source-dirs:         test
+    dependencies:
+    - password-manager
+    - hspec
+    - containers
+    - QuickCheck
+    - quickcheck-instances
